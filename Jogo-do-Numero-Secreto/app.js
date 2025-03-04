@@ -1,72 +1,61 @@
 
-let listaNumerosSorteados = [];
-let numeroLimite = 100;
+const listaNumerosSorteados = [];
+const numeroLimite = 100;
+const element = (e) => document.getElementById(e);
 let numeroSecreto;
 let tentativas;
 
 iniciarNovoJogo();
 
-
 function iniciarNovoJogo() {
-        limparLista();
-        numeroSecreto = gerarNumeroAleatorio(numeroLimite);
-        tentativas = 0;
-        exibirTextoNaTela('h1', 'Jogo do Número Secreto');
-        exibirTextoNaTela('p', `Escolha um número entre 1 e ${numeroLimite}`);
-        document.getElementById('reiniciar').setAttribute('disabled', true);
+    if (listaNumerosSorteados.length == numeroLimite) limparLista(); 
+    tentativas = 0;
+    numeroSecreto = gerarNumeroAleatorio();
+    console.log(numeroSecreto);
+    listaNumerosSorteados.push(numeroSecreto);
+    exibirTextoNaTela('h1', 'Jogo do Número Secreto');
+    exibirTextoNaTela('p', `Escolha um número entre 1 e ${numeroLimite}`);
+    element('reiniciar').setAttribute('disabled', true);
 }
 
 function verificarChute() {
-    let chute = document.querySelector('input').value;
-    if (validaPossibilidades(chute)) {
-        
+    const chute = obterChute();
+    if (chute == numeroSecreto) encerrarJogo();
+    if (chute > numeroSecreto) exibirTextoNaTela('p', `O número é menor que ${chute}`);
+    if (chute < numeroSecreto) exibirTextoNaTela('p', `O número é maior que ${chute}`);
+    limparCampo()
+}
+
+function encerrarJogo() {
+    exibirTextoNaTela('p', `Parabéns! você acertou em ${tentativas} ${tentativas > 1 ? 'tentativas' : 'tentativa'}`);
+    element('reiniciar').removeAttribute('disabled');
+}
+
+function obterChute() {
+    let chute = element('input_chute').value;
+    if (chute.match('[1-9]') && (chute >= 1 && chute <= numeroLimite)) {
         tentativas++;
-        if (chute == numeroSecreto) {
-            let mensagem = `Parabéns! você acertou em ${tentativas} ${tentativas > 1 ? 'tentativas' : 'tentativa'}`;
-            exibirTextoNaTela('p', mensagem);
-            document.getElementById('reiniciar').removeAttribute('disabled');
-        } else if (chute > numeroSecreto) {
-            exibirTextoNaTela('p', `O número é menor que ${chute}`);
-        } else if (chute < numeroSecreto) {
-            exibirTextoNaTela('p', `O número é maior que ${chute}`);
-        }
-        limparCampo();
-
+        return chute;
     } else {
-        alert(`O palpite deve ser um número entre 1 e ${numeroLimite}`);
-        limparCampo();
+        return alert(`O palpite deve ser um número entre 1 e ${numeroLimite}`);
     }
 }
 
-function validaPossibilidades(chute) {
-    return chute.match('[1-9]') && (chute >= 1 && chute <= numeroLimite);
-}
-
-function gerarNumeroAleatorio(numeroLimite) {
+function gerarNumeroAleatorio() {
     let numero = parseInt(Math.random() * numeroLimite + 1);
-    if (!listaNumerosSorteados.includes(numero)) {
-        listaNumerosSorteados.push(numero);
-        return numero;
-    } else {
-        return gerarNumeroAleatorio();
-    }
+    return listaNumerosSorteados.includes(numero) ? gerarNumeroAleatorio : numero;
 }
 
 function limparLista() {
-    if (listaNumerosSorteados.length == 10) {
-        alert("Você já descobriu todos os números, a lista será reiniciada");
-        listaNumerosSorteados = [];
-    }
+    alert("Você já descobriu todos os números, a lista será reiniciada");
+    listaNumerosSorteados = [];
 }
 
 function limparCampo() {
-    campo = document.querySelector('input');
-    campo.value = null;
+    element('input_chute').value = null;
 }
 
-
 function exibirTextoNaTela(tag, texto) {
-    campo = document.querySelector(tag);
-    campo.innerHTML = texto;
+    document.querySelector(tag).innerHTML = texto;
     responsiveVoice.speak(texto, 'Brazilian Portuguese Female', {rate:1.2});
 }
